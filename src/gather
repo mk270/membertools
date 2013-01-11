@@ -1,0 +1,44 @@
+#!/usr/bin/env python
+
+#  Membertools, a basic set of tools for administering lists, by Martin Keegan
+
+#  Copyright (C) 2013  Martin Keegan
+#
+#  This programme is free software; you may redistribute and/or modify
+#  it under the terms of the Apache Software Licence v2.0
+
+import ConfigParser
+import oursql
+import psycopg2
+from decant import transfer_entries
+
+def run(conf):
+    upstream_user = conf.get('mysql', 'db_user')
+    upstream_passwd = conf.get('mysql', 'db_passwd')
+    
+    downstream = psycopg2.connect(database='rewired_state')
+
+    upstream = oursql.connect('127.0.0.1', upstream_user, upstream_passwd, 
+                              db='yrs_cms_live')
+
+    transfer_entries(upstream, downstream,
+        'centres', 'centre', 
+        ['city', 'name', 'contactemail'], 
+        ['city', 'name', 'contactemail'],
+        'contactemail',
+        'contactemail')
+
+    upstream = oursql.connect('127.0.0.1', upstream_user, upstream_passwd, 
+                              db='rewiredstate_pyrocms_live')
+
+    transfer_entries(upstream, downstream,
+        'default_event_users', 'people',
+        ['first_name', 'email', 'phone', 'year(dob)'],
+        ['name', 'email', 'telno', 'birthyear'],
+        'email',
+        'email')
+
+if __name__ == '__main__':
+    conf = ConfigParser.ConfigParser()
+    conf.read('mc.ini')
+    run(conf)

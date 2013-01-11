@@ -1,0 +1,9 @@
+
+[mailchimp]
+api_key: 1234fffffffffffffffffffffffff567-us5
+
+[mysql]
+db_user: root
+db_passwd: letmein
+
+

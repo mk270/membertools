@@ -1,0 +1,63 @@
+#!/usr/bin/env python
+
+#  Membertools, a basic set of tools for administering lists, by Martin Keegan
+
+#  Copyright (C) 2013  Martin Keegan
+#
+#  This programme is free software; you may redistribute and/or modify
+#  it under the terms of the Apache Software Licence v2.0
+
+import itertools
+import ConfigParser
+from mailchimp import update_list
+import rsdb
+
+def name_tuple_from_string(name):
+    if name is None:
+        return (None, None)
+    words = name.split()
+    count = len(words)
+    if 2 <= count:
+        return (words[0], words[-1])
+    if 1 == count:
+        return (words[0], None)
+    # 0 == count
+    return (None, None)
+
+def mailchimp_tuple_from_db(row):
+    email, name = row
+    first_name, last_name = name_tuple_from_string(name)
+    return (email, first_name, last_name)
+
+# this is NOT a full test for email address validity at all
+def valid_email_address(details):
+    address = details[0]
+
+    if address is None:
+        return False
+    if ' ' in address:
+        return False
+    if '@' not in address:
+        return False
+    return True
+
+def sync_list(api_key, list_name, sql):
+    people = rsdb.query(sql)
+    list_data1 = itertools.imap(mailchimp_tuple_from_db, people)
+    list_data2 = itertools.ifilter(valid_email_address, list_data1)
+
+    update_list(api_key, list_name, 10, list_data2)
+
+def run():
+    conf = ConfigParser.ConfigParser()
+    conf.read('mc.ini')
+    api_key = conf.get('mailchimp', 'api_key')
+
+    sync_list(api_key,
+              'My First Test List', 
+              "select email, name from people;")
+
+# need to take name and sql query results generator
+
+if __name__ == '__main__':
+    run()
