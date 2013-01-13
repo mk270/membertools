@@ -43,10 +43,10 @@ def _transfer_entries(upstream, downstream,
                                                         dst_placeholders)
         lookup = dict(zip(src_cols, dst_cols))
 
-        print "LOOKUP", lookup
+        #print "LOOKUP", lookup
         if len(new_rows) > 1:
-            print "NEW_ROWS[0]", new_rows[0]
-        print "SRC_COLS", src_cols
+            pass # print "NEW_ROWS[0]", new_rows[0]
+        #print "SRC_COLS", src_cols
 
         # insert remaining rows into downstream
         for row in new_rows:
