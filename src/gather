@@ -38,7 +38,7 @@ def run(conf):
             "first_name":"name",
             "email": "email",
             "phone": "telno",
-            "year(dob)", "birthyear"
+            "year(dob)": "birthyear"
             },
                      'email',
                      'email')
