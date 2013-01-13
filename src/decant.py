@@ -7,7 +7,7 @@
 
 import oursql
 
-def transfer_entries(upstream, downstream, 
+def _transfer_entries(upstream, downstream, 
                      src_tbl, dst_tbl, 
                      src_cols, dst_cols, 
                      src_key_col, dst_key_col):
@@ -50,10 +50,24 @@ def transfer_entries(upstream, downstream,
 
         # insert remaining rows into downstream
         for row in new_rows:
-            print "ROW", row
+            #print "ROW", row
             dst_values = map(lambda i: row[i], src_cols)
             c = downstream.cursor()
             rv = c.execute(sql, dst_values)
         downstream.commit()
 
     decant()
+
+def transfer_entries(upstream, downstream, 
+                     src_tbl, dst_tbl, 
+                     column_mapping,
+                     src_key_col, dst_key_col):
+
+    pairs = [ (k, v) for k, v in column_mapping.iteritems() ]
+    src_cols = [ i[0] for i in pairs ]
+    dst_cols = [ i[1] for i in pairs ]
+
+    return _transfer_entries(upstream, downstream, 
+                     src_tbl, dst_tbl, 
+                     src_cols, dst_cols, 
+                     src_key_col, dst_key_col)

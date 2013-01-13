@@ -22,21 +22,26 @@ def run(conf):
                               db='yrs_cms_live')
 
     transfer_entries(upstream, downstream,
-        'centres', 'centre', 
-        ['city', 'name', 'contactemail'], 
-        ['city', 'name', 'contactemail'],
-        'contactemail',
-        'contactemail')
+        'centres', 'centre', {
+            "city": "city",
+            "name": "name",
+            "contactemail": "contactemail"
+            },
+                     'contactemail',
+                     'contactemail')
 
     upstream = oursql.connect('127.0.0.1', upstream_user, upstream_passwd, 
                               db='rewiredstate_pyrocms_live')
 
     transfer_entries(upstream, downstream,
-        'default_event_users', 'people',
-        ['first_name', 'email', 'phone', 'year(dob)'],
-        ['name', 'email', 'telno', 'birthyear'],
-        'email',
-        'email')
+        'default_event_users', 'people', {
+            "first_name":"name",
+            "email": "email",
+            "phone": "telno",
+            "year(dob)", "birthyear"
+            },
+                     'email',
+                     'email')
 
 if __name__ == '__main__':
     conf = ConfigParser.ConfigParser()
