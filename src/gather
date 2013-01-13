@@ -7,6 +7,7 @@
 #  This programme is free software; you may redistribute and/or modify
 #  it under the terms of the Apache Software Licence v2.0
 
+import sys
 import ConfigParser
 import oursql
 import psycopg2
@@ -44,6 +45,12 @@ def run(conf):
                      'email')
 
 if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print "Usage: gather configfile.ini"
+        sys.exit(1)
+
+    _, config_file = sys.argv
+
     conf = ConfigParser.ConfigParser()
-    conf.read('mc.ini')
+    conf.read(config_file)
     run(conf)
