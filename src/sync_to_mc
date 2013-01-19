@@ -7,7 +7,9 @@
 #  This programme is free software; you may redistribute and/or modify
 #  it under the terms of the Apache Software Licence v2.0
 
+import sys
 import itertools
+import json
 import ConfigParser
 from mailchimp import update_list
 import rsdb
@@ -48,16 +50,26 @@ def sync_list(api_key, list_name, sql):
 
     update_list(api_key, list_name, 10, list_data2)
 
-def run():
-    conf = ConfigParser.ConfigParser()
-    conf.read('mc.ini')
+def run(conf, mailing_lists):
     api_key = conf.get('mailchimp', 'api_key')
 
-    sync_list(api_key,
-              'My First Test List', 
-              "select email, name from people;")
+    def do_sync(ml_info):
+        sync_list(api_key,
+                  ml_info["mailing_list"],
+                  ml_info["query"])
 
-# need to take name and sql query results generator
+    [ do_sync(ml) for ml in mailing_lists ]
 
 if __name__ == '__main__':
-    run()
+    if sys.argv != 3:
+        print "Usage: sync_to_mc sync.ini mailing_lists.json"
+        sys.exit(1)
+
+    _, conf_file, ml_file = sys.argv
+
+    conf = ConfigParser.ConfigParser()
+    conf.read(conf_file)
+
+    mailing_lists = json.load(file(ml_file))
+
+    run(conf, mailing_lists)
