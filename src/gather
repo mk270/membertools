@@ -13,7 +13,7 @@ import oursql
 import psycopg2
 from decant import transfer_entries
 
-def run(conf):
+def run(conf, transfers):
     upstream_hostname = conf.get('mysql', 'db_hostname')
     upstream_user = conf.get('mysql', 'db_user')
     upstream_passwd = conf.get('mysql', 'db_passwd')
@@ -65,12 +65,15 @@ def run(conf):
     [ transfer_table(t) for t in transfers ]
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print "Usage: gather configfile.ini"
+    if len(sys.argv) != 3:
+        print "Usage: gather configfile.ini transfers.json"
         sys.exit(1)
 
-    _, config_file = sys.argv
+    _, config_file, transfers_file = sys.argv
 
     conf = ConfigParser.ConfigParser()
     conf.read(config_file)
-    run(conf)
+
+    transfers_config = json.load(file(transfers_file))
+
+    run(conf, transfers_config)
