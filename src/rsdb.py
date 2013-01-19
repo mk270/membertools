@@ -8,14 +8,12 @@
 
 import psycopg2
 
-DB_NAME = 'rewired_state'
-
-def db_handle():
-    db = psycopg2.connect(database=DB_NAME)
+def db_handle(database_name):
+    db = psycopg2.connect(database=database_name)
     return db
 
-def query(sql):
-    db = db_handle()
+def query(database_name, sql):
+    db = db_handle(database_name)
 
     c = db.cursor(name="mycursor")
     c.itersize = 2000

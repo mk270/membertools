@@ -43,15 +43,16 @@ def valid_email_address(details):
         return False
     return True
 
-def sync_list(api_key, list_name, sql):
-    people = rsdb.query(sql)
-    list_data1 = itertools.imap(mailchimp_tuple_from_db, people)
-    list_data2 = itertools.ifilter(valid_email_address, list_data1)
-
-    update_list(api_key, list_name, 10, list_data2)
-
 def run(conf, mailing_lists):
     api_key = conf.get('mailchimp', 'api_key')
+    database_name = conf.get('postgres', 'db_name')
+
+    def sync_list(api_key, list_name, sql):
+        people = rsdb.query(database_name, sql)
+        list_data1 = itertools.imap(mailchimp_tuple_from_db, people)
+        list_data2 = itertools.ifilter(valid_email_address, list_data1)
+
+        update_list(api_key, list_name, 10, list_data2)
 
     def do_sync(ml_info):
         sync_list(api_key,
