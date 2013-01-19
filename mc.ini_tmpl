@@ -5,5 +5,8 @@ api_key: 1234fffffffffffffffffffffffff567-us5
 [mysql]
 db_user: root
 db_passwd: letmein
+db_hostname: 127.0.0.1
 
+[postgres]
+db_name: live_db
 

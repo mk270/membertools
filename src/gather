@@ -14,35 +14,55 @@ import psycopg2
 from decant import transfer_entries
 
 def run(conf):
+    upstream_hostname = conf.get('mysql', 'db_hostname')
     upstream_user = conf.get('mysql', 'db_user')
     upstream_passwd = conf.get('mysql', 'db_passwd')
-    
-    downstream = psycopg2.connect(database='rewired_state')
+    downstream_db_name = conf.get('postgres', 'db_name')
 
-    upstream = oursql.connect('127.0.0.1', upstream_user, upstream_passwd, 
-                              db='yrs_cms_live')
+    downstream = psycopg2.connect(database=downstream_db_name)
 
-    transfer_entries(upstream, downstream,
-        'centres', 'centre', {
-            "city": "city",
-            "name": "name",
-            "contactemail": "contactemail"
+    def transfer_table(table_config):
+        upstream = oursql.connect(upstream_hostname, 
+                                  upstream_user, 
+                                  upstream_passwd,
+                                  table_config['db_name'])
+
+        return transfer_entries(upstream, downstream,
+                         table_config["source_table"],
+                         table_config["destination_table"],
+                         table_config["column_mapping"],
+                         table_config["source_key_column"],
+                         table_config["destination_key_column"])
+
+    transfers = [ 
+        {
+            "db_name": "yrs_cms_live",
+            "source_table": "centres",
+            "destination_table": "centres",
+            "column_mapping": {
+                "city": "city",
+                "name": "name",
+                "contactemail": "contactemail"
+                },
+            "source_key_column": "contactemail",
+            "destination_key_column": "contactemail"
             },
-                     'contactemail',
-                     'contactemail')
+        {
+            "db_name": "rewiredstate_pyrocms_live",
+            "source_table": "default_event_users",
+            "destination_table": "people",
+            "column_mapping": {
+                "first_name":"name",
+                "email": "email",
+                "phone": "telno",
+                "year(dob)": "birthyear"
+                },
+            "source_key_column": "email",
+            "destination_key_column": "email"
+            }
+        ]
 
-    upstream = oursql.connect('127.0.0.1', upstream_user, upstream_passwd, 
-                              db='rewiredstate_pyrocms_live')
-
-    transfer_entries(upstream, downstream,
-        'default_event_users', 'people', {
-            "first_name":"name",
-            "email": "email",
-            "phone": "telno",
-            "year(dob)": "birthyear"
-            },
-                     'email',
-                     'email')
+    [ transfer_table(t) for t in transfers ]
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
