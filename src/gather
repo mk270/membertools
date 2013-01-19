@@ -25,7 +25,7 @@ def run(conf):
         upstream = oursql.connect(upstream_hostname, 
                                   upstream_user, 
                                   upstream_passwd,
-                                  table_config['db_name'])
+                                  db=table_config['db_name'])
 
         return transfer_entries(upstream, downstream,
                          table_config["source_table"],
