@@ -8,6 +8,7 @@
 #  it under the terms of the Apache Software Licence v2.0
 
 import sys
+import json
 import ConfigParser
 import oursql
 import psycopg2
@@ -33,34 +34,6 @@ def run(conf, transfers):
                          table_config["column_mapping"],
                          table_config["source_key_column"],
                          table_config["destination_key_column"])
-
-    transfers = [ 
-        {
-            "db_name": "yrs_cms_live",
-            "source_table": "centres",
-            "destination_table": "centre",
-            "column_mapping": {
-                "city": "city",
-                "name": "name",
-                "contactemail": "contactemail"
-                },
-            "source_key_column": "contactemail",
-            "destination_key_column": "contactemail"
-            },
-        {
-            "db_name": "rewiredstate_pyrocms_live",
-            "source_table": "default_event_users",
-            "destination_table": "people",
-            "column_mapping": {
-                "first_name":"name",
-                "email": "email",
-                "phone": "telno",
-                "year(dob)": "birthyear"
-                },
-            "source_key_column": "email",
-            "destination_key_column": "email"
-            }
-        ]
 
     [ transfer_table(t) for t in transfers ]
 
