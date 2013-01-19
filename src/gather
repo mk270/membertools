@@ -38,7 +38,7 @@ def run(conf):
         {
             "db_name": "yrs_cms_live",
             "source_table": "centres",
-            "destination_table": "centres",
+            "destination_table": "centre",
             "column_mapping": {
                 "city": "city",
                 "name": "name",
