@@ -1,0 +1,6 @@
+[
+  {		
+    "mailing_list": "My First Test List",
+    "query": "select email, name from people;"
+  }
+]
