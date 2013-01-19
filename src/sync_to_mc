@@ -61,7 +61,7 @@ def run(conf, mailing_lists):
     [ do_sync(ml) for ml in mailing_lists ]
 
 if __name__ == '__main__':
-    if sys.argv != 3:
+    if len(sys.argv) != 3:
         print "Usage: sync_to_mc sync.ini mailing_lists.json"
         sys.exit(1)
 
