@@ -1,4 +1,6 @@
 mc.ini
+sync.ini
 transfers.json
+mailing_lists.json
 *~
 *.pyc
