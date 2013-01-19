@@ -36,7 +36,7 @@ def get_list_by_name(pm, list_name):
     assert lists['total'] == 1
     return lists['data'][0]['id']
 
-def update_list(api_key, list_name, batch_size, list_source):
+def update_list(api_key, list_name, batch_size, list_source, verbose=False):
     pm = PostMonkey(api_key, timeout=20)
 
     list_id = get_list_by_name(pm, list_name)
@@ -45,4 +45,6 @@ def update_list(api_key, list_name, batch_size, list_source):
     member_stream = batch_generator(batch_size, member_source)
 
     for batch in member_stream:
-        print batch_subscribe(pm, list_id, batch)
+        results = batch_subscribe(pm, list_id, batch)
+        if verbose:
+            print results
