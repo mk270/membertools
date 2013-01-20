@@ -30,7 +30,21 @@ def batch_subscribe(pm, list_id, members):
                           batch=members, 
                           double_optin=False, 
                           update_existing=True)
-    
+
+def batch_unsubscribe(pm, list_id, email_addresses):
+    return pm.listBatchUnsubscribe(id=list_id,
+                                   emails=email_addresses,
+                                   delete_member=True,
+                                   send_goodbye=False,
+                                   send_notify=False)
+
+# conks out at 15000 - need to use Export API to work around
+# this
+def get_subscriber_addresses(pm, list_id):
+    return [ i["email"] for i in pm.listMembers(id=list_id, 
+                                                status="subscribed", 
+                                                limit=15000)["data"] ]
+
 def get_list_by_name(pm, list_name):
     lists = pm.lists(filters={'list_name':list_name})
     assert lists['total'] == 1
@@ -44,7 +58,23 @@ def update_list(api_key, list_name, batch_size, list_source, verbose=False):
     member_source = itertools.imap(mailchimp_dict_of_tuple, list_source)
     member_stream = batch_generator(batch_size, member_source)
 
+    email_addresses_present = []
+    email_addresses_desired = []
+
+    email_addresses_present = get_subscriber_addresses(pm, list_id)
+
     for batch in member_stream:
         results = batch_subscribe(pm, list_id, batch)
+        email_addresses_desired += [ i["EMAIL"] for i in batch ]
         if verbose:
             print results
+            
+    def email_addresses_to_remove():
+        for address in filter(lambda i: i not in email_addresses_desired, 
+                              email_addresses_present):
+            yield address
+
+    removal_stream = batch_generator(batch_size, email_addresses_to_remove())
+
+    for batch in removal_stream:
+        batch_unsubscribe(pm, list_id, batch)
