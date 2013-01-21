@@ -7,6 +7,7 @@
 #  This programme is free software; you may redistribute and/or modify
 #  it under the terms of the Apache Software Licence v2.0
 
+import sys
 import itertools
 from postmonkey import PostMonkey
 from batch_generator import batch_generator
@@ -24,6 +25,8 @@ def mailchimp_dict_of_tuple(details):
     if details[2] is not None:
         tmp['LNAME'] = details[2]
     return tmp
+
+def address_of_member(details): return details[0]
 
 def batch_subscribe(pm, list_id, members):
     return pm.listBatchSubscribe(id=list_id, 
@@ -55,20 +58,21 @@ def update_list(api_key, list_name, batch_size, list_source, verbose=False):
 
     list_id = get_list_by_name(pm, list_name)
 
-    member_source = itertools.imap(mailchimp_dict_of_tuple, list_source)
-    member_stream = batch_generator(batch_size, member_source)
-
     email_addresses_present = []
     email_addresses_desired = []
 
     email_addresses_present = get_subscriber_addresses(pm, list_id)
 
+    member_source = itertools.imap(mailchimp_dict_of_tuple, list_source)
+    member_stream = batch_generator(batch_size, member_source)
+
     for batch in member_stream:
-        results = batch_subscribe(pm, list_id, batch)
         email_addresses_desired += [ i["EMAIL"] for i in batch ]
+        batch = filter(lambda i: i["EMAIL"] not in email_addresses_present, batch)
+        results = batch_subscribe(pm, list_id, batch)
         if verbose:
             print results
-            
+
     def email_addresses_to_remove():
         for address in filter(lambda i: i not in email_addresses_desired, 
                               email_addresses_present):
@@ -77,4 +81,6 @@ def update_list(api_key, list_name, batch_size, list_source, verbose=False):
     removal_stream = batch_generator(batch_size, email_addresses_to_remove())
 
     for batch in removal_stream:
-        batch_unsubscribe(pm, list_id, batch)
+        results = batch_unsubscribe(pm, list_id, batch)
+        if verbose:
+            print results
