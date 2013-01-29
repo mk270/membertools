@@ -56,7 +56,22 @@ def _transfer_entries(upstream, downstream,
         unique_keys = {}
         # insert remaining rows into downstream
         for row in new_rows:
-            dst_values = map(lambda i: row[i], src_cols)
+            # hack on a stick
+            def lookup_col(col_id):
+                delim = " as "
+                force_bool = False
+                col_id = col_id.lower()
+                if delim in col_id:
+                    parts = col_id.split(delim)
+                    col_id = parts[-1]
+                    force_bool = True
+                val = row[col_id]
+                if isinstance(val, unicode):
+                    val = val.encode('raw_unicode_escape').decode('utf8')
+                if not force_bool: return val
+                if val in [0, 1]: return bool(val)
+                return val
+            dst_values = map(lookup_col, src_cols)
 
             key = slice(row, [ lookup[dkc] for dkc in dst_key_cols ])
             if key in unique_keys:
