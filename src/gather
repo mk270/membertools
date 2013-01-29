@@ -32,8 +32,8 @@ def run(conf, transfers):
                          table_config["source_table"],
                          table_config["destination_table"],
                          table_config["column_mapping"],
-                         table_config["source_key_column"],
-                         table_config["destination_key_column"])
+                         table_config["source_key_columns"],
+                         table_config["destination_key_columns"])
 
     [ transfer_table(t) for t in transfers ]
 

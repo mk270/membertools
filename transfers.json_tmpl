@@ -8,8 +8,8 @@
       "name": "name",
       "contactemail": "contactemail"
     },
-    "source_key_column": "contactemail",
-    "destination_key_column": "contactemail"
+    "source_key_columns": [ "contactemail" ],
+    "destination_key_columns": [ "contactemail" ]
   },
   {
     "db_name": "rewiredstate_pyrocms_live",
@@ -21,7 +21,7 @@
       "phone": "telno",
       "year(dob)": "birthyear"
     },
-    "source_key_column": "email",
-    "destination_key_column": "email"
+    "source_key_columns": [ "email" ],
+    "destination_key_columns": [ "email" ]
   }
 ]

@@ -11,16 +11,16 @@ import sys
 def _transfer_entries(upstream, downstream, 
                      src_tbl, dst_tbl, 
                      src_cols, dst_cols, 
-                     src_key_col, dst_key_col):
+                     src_key_cols, dst_key_cols):
 
     def decant():
         assert len(src_cols) == len(dst_cols)
-        for col in src_key_col:
-            if col not in src_key_col:
+        for col in src_key_cols:
+            if col not in src_key_cols:
                 print "Source key column '%s' not mentioned in mapping" % col
                 sys.exit(1)
-        for col in dst_key_col:
-            if col not in dst_key_col:
+        for col in dst_key_cols:
+            if col not in dst_key_cols:
                 print "Destination key column '%s' not mentioned in mapping" % col
                 sys.exit(1)
 
@@ -35,7 +35,7 @@ def _transfer_entries(upstream, downstream,
             rows = c.fetchall()
 
         # get the key column from downstream
-        dst_key_col_names = ", ".join(dst_key_col)
+        dst_key_col_names = ", ".join(dst_key_cols)
         sql = '''select %s from %s''' % (dst_key_col_names, dst_tbl)
 
         c = downstream.cursor()
@@ -45,7 +45,7 @@ def _transfer_entries(upstream, downstream,
         # remove rows which are already present downstream
         def slice(row, columns):
             return tuple([ row[c] for c in columns ])
-        new_rows = filter(lambda x: slice(x, src_key_col) not in dst_keys, rows)
+        new_rows = filter(lambda x: slice(x, src_key_cols) not in dst_keys, rows)
 
         dst_placeholders = ", ".join(["%s"] * len(dst_cols))
         sql = '''insert into %s (%s) values (%s);''' % (dst_tbl, 
@@ -58,7 +58,7 @@ def _transfer_entries(upstream, downstream,
         for row in new_rows:
             dst_values = map(lambda i: row[i], src_cols)
 
-            key = slice(row, [ lookup[dkc] for dkc in dst_key_col ])
+            key = slice(row, [ lookup[dkc] for dkc in dst_key_cols ])
             if key in unique_keys:
                 continue # aaaargh
             unique_keys[key] = True
@@ -72,7 +72,7 @@ def _transfer_entries(upstream, downstream,
 def transfer_entries(upstream, downstream, 
                      src_tbl, dst_tbl, 
                      column_mapping,
-                     src_key_col, dst_key_col):
+                     src_key_cols, dst_key_cols):
 
     pairs = [ (k, v) for k, v in column_mapping.iteritems() ]
     src_cols = [ i[0] for i in pairs ]
@@ -81,4 +81,4 @@ def transfer_entries(upstream, downstream,
     return _transfer_entries(upstream, downstream, 
                      src_tbl, dst_tbl, 
                      src_cols, dst_cols, 
-                     src_key_col, dst_key_col)
+                     src_key_cols, dst_key_cols)
